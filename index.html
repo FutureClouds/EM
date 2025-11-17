@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud ExamMock</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', 'Roboto', sans-serif;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            transition: all 0.5s ease;
+        }
+
+        /* Day Mode Styles */
+        body.day-mode {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 20%, #3498db 60%, #8e44ad 100%);
+            color: #2c3e50;
+        }
+
+        body.day-mode::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(142, 68, 173, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Night Mode Styles */
+        body.night-mode {
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 30%, #16213e 70%, #0f3460 100%);
+            color: #fff;
+        }
+
+        body.night-mode::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .day-mode .theme-toggle {
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            color: white;
+        }
+
+        .night-mode .theme-toggle {
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.8));
+            color: #e8eaed;
+            border: 2px solid rgba(120, 119, 198, 0.4);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(10deg);
+            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.95);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 40px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .day-mode h1 {
+            color: #fff;
+            text-shadow: 
+                0 0 20px rgba(120, 119, 198, 0.4), 
+                2px 2px 8px rgba(0,0,0,0.6),
+                0 0 40px rgba(52, 152, 219, 0.3);
+            background: linear-gradient(135deg, #ffffff, #e8eaed, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .night-mode h1 {
+            color: #e8eaed;
+            text-shadow: 0 0 20px rgba(120, 119, 198, 0.5), 2px 2px 8px rgba(0,0,0,0.8);
+            background: linear-gradient(135deg, #ffffff, #a8b2d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .exam-grid {
+            display: grid;
+            gap: 25px;
+            grid-template-columns: repeat(4, 1fr);
+            margin-top: 30px;
+        }
+
+        .exam-card {
+            border-radius: 20px;
+            padding: 30px 20px;
+            text-decoration: none;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Day Mode Cards */
+        .day-mode .exam-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.9));
+            color: #2c3e50;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8),
+                0 0 0 1px rgba(120, 119, 198, 0.1);
+        }
+
+        /* Night Mode Cards */
+        .night-mode .exam-card {
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.8));
+            color: #e8eaed;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 0 1px rgba(120, 119, 198, 0.2);
+        }
+
+        .exam-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+            opacity: 0;
+        }
+
+        .day-mode .exam-card::before {
+            background: linear-gradient(45deg, transparent, rgba(52, 152, 219, 0.4), rgba(142, 68, 173, 0.3), transparent);
+        }
+
+        .night-mode .exam-card::before {
+            background: linear-gradient(45deg, transparent, rgba(120, 119, 198, 0.4), transparent);
+        }
+
+        .exam-card:hover::before {
+            animation: shine 1.5s ease-in-out;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+        }
+
+        .exam-card:hover {
+            transform: translateY(-10px) scale(1.05);
+        }
+
+        .day-mode .exam-card:hover {
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                0 0 0 2px rgba(52, 152, 219, 0.6),
+                0 0 30px rgba(52, 152, 219, 0.4),
+                0 0 50px rgba(142, 68, 173, 0.2);
+            border: 2px solid rgba(52, 152, 219, 0.8);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(240, 248, 255, 0.95));
+            color: #1a202c;
+        }
+
+        .night-mode .exam-card:hover {
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                0 0 0 2px rgba(120, 119, 198, 0.6),
+                0 0 30px rgba(120, 119, 198, 0.3);
+            border: 2px solid rgba(120, 119, 198, 0.8);
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.9));
+        }
+
+        .exam-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .day-mode .exam-title {
+            color: #2980b9;
+            text-shadow: 
+                0 0 10px rgba(52, 152, 219, 0.3),
+                1px 1px 2px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #2980b9, #8e44ad, #3498db);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .night-mode .exam-title {
+            color: #a8b2d1;
+            text-shadow: 0 0 10px rgba(120, 119, 198, 0.5);
+            background: linear-gradient(135deg, #a8b2d1, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .exam-badge {
+            width: 150px;
+            height: 150px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.4s ease;
+            position: relative;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+        .exam-card:hover .exam-badge {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .exam-code {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-top: 15px;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .day-mode .exam-code {
+            color: #34495e;
+            text-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+        }
+
+        .night-mode .exam-code {
+            color: #a8b2d1;
+            text-shadow: 0 0 8px rgba(120, 119, 198, 0.3);
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .exam-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+                margin-bottom: 25px;
+            }
+            
+            .exam-title {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+            
+            .exam-badge {
+                width: 120px;
+                height: 120px;
+                margin: 15px auto;
+            }
+            
+            .exam-code {
+                font-size: 1.4rem;
+                margin-top: 10px;
+            }
+            
+            .exam-card {
+                padding: 20px 15px;
+            }
+
+            .theme-toggle {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+                top: 20px;
+                right: 20px;
+            }
+        }
+
+        /* Tablet Responsiveness */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .exam-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Click Effect */
+        .exam-card:active {
+            transform: translateY(-5px) scale(0.98);
+        }
+    </style>
+</head>
+<body class="day-mode">
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    
+    <div class="container">
+        <h1>Cloud ExamMock</h1>
+        
+        <div class="exam-grid">
+            <!-- Card 1 -->
+            <a href="https://futureclouds.github.io/AIF-C01" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="AIF.png" alt="AIF Badge" class="exam-badge">
+                <div class="exam-code">AIF-C01</div>
+            </a>
+
+            <!-- Card 2 -->
+            <a href="https://futureclouds.github.io/CLF-C02" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="CLF.png" alt="CLF Badge" class="exam-badge">
+                <div class="exam-code">CLF-C02</div>
+            </a>
+
+            <!-- Card 3 -->
+            <a href="https://futureclouds.github.io/MLA-C01" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="MLA.png" alt="MLA Badge" class="exam-badge">
+                <div class="exam-code">MLA-C01</div>
+            </a>
+
+            <!-- Card 4 -->
+            <a href="https://futureclouds.github.io/SAA-C03" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="SAA.png" alt="SAA Badge" class="exam-badge">
+                <div class="exam-code">SAA-C03</div>
+            </a>
+
+            <!-- Card 5 -->
+            <a href="https://futureclouds.github.io/DVA-C02" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="DVA.png" alt="DVA Badge" class="exam-badge">
+                <div class="exam-code">DVA-C02</div>
+            </a>
+
+            <!-- Card 6 -->
+            <a href="https://futureclouds.github.io/DEA-C01" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="DEA.png" alt="DEA Badge" class="exam-badge">
+                <div class="exam-code">DEA-C01</div>
+            </a>
+
+            <!-- Card 7 -->
+            <a href="https://futureclouds.github.io/SOA-C03" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="SOA3.png" alt="SOA Badge" class="exam-badge">
+                <div class="exam-code">SOA-C03</div>
+            </a>
+
+            <!-- Card 8 -->
+            <a href="https://futureclouds.github.io/SAP-C02" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="SAP.png" alt="SAP Badge" class="exam-badge">
+                <div class="exam-code">SAP-C02</div>
+            </a>
+
+            <!-- Card 9 -->
+            <a href="https://futureclouds.github.io/DOP-C02" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="DOP.png" alt="DOP Badge" class="exam-badge">
+                <div class="exam-code">DOP-C02</div>
+            </a>
+
+            <!-- Card 10 -->
+            <a href="https://futureclouds.github.io/MLS-C01" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="MLS.png" alt="MLS Badge" class="exam-badge">
+                <div class="exam-code">MLS-C01</div>
+            </a>
+
+            <!-- Card 11 -->
+            <a href="https://futureclouds.github.io/SCS-C02" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="SCS.png" alt="SCS Badge" class="exam-badge">
+                <div class="exam-code">SCS-C02</div>
+            </a>
+
+            <!-- Card 12 -->
+            <a href="https://futureclouds.github.io/ANS-C01" class="exam-card" target="_blank">
+                <div class="exam-title">Exam</div>
+                <img src="ANS.png" alt="ANS Badge" class="exam-badge">
+                <div class="exam-code">ANS-C01</div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.querySelector('.theme-toggle');
+            
+            if (body.classList.contains('day-mode')) {
+                body.classList.remove('day-mode');
+                body.classList.add('night-mode');
+                themeToggle.textContent = '🌞';
+            } else {
+                body.classList.remove('night-mode');
+                body.classList.add('day-mode');
+                themeToggle.textContent = '🌙';
+            }
+        }
+
+        // Interactive effects for cards
+        document.querySelectorAll('.exam-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.animationPlayState = 'running';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.animationPlayState = 'paused';
+            });
+        });
+
+        // Optional: Save theme preference
+        function saveTheme() {
+            const body = document.body;
+            if (body.classList.contains('night-mode')) {
+                localStorage.setItem('theme', 'night');
+            } else {
+                localStorage.setItem('theme', 'day');
+            }
+        }
+
+        // Load saved theme on page load
+        window.addEventListener('load', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const body = document.body;
+            const themeToggle = document.querySelector('.theme-toggle');
+            
+            if (savedTheme === 'night') {
+                body.classList.remove('day-mode');
+                body.classList.add('night-mode');
+                themeToggle.textContent = '🌞';
+            }
+        });
+
+        // Save theme when toggling
+        document.querySelector('.theme-toggle').addEventListener('click', saveTheme);
+    </script>
+</body>
+</html>
